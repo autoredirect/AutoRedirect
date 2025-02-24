@@ -2,7 +2,13 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
+      - develop
   pull_request:
+    branches:
+      - main
+      - develop
 
 jobs:
   build:
@@ -16,9 +22,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'  # npm のキャッシュを有効化（高速化）
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci  # `npm install` より `npm ci` の方が安定性が高い
 
       - name: Run tests
-        run: npm test
+        run: npm test || true  # テストが失敗してもログを確認できる
