@@ -9,6 +9,7 @@ on:
     branches:
       - main
       - develop
+  workflow_dispatch:
 
 jobs:
   build:
@@ -23,9 +24,12 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'  # npm のキャッシュを有効化（高速化）
+          cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Install dependencies
         run: npm ci  # `npm install` より `npm ci` の方が安定性が高い
+        working-directory: frontend
 
       - name: Run tests
         run: npm test || true  # テストが失敗してもログを確認できる
+        working-directory: frontend
