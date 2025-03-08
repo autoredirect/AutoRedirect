@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../db');  // DB接続
+const verifyToken = require('../middleware/verifyToken');  // JWT認証ミドルウェアを追加
 
 const router = express.Router();
 
@@ -65,6 +66,23 @@ router.post('/login', async (req, res) => {
     } catch (error) {
         console.error('❌ ログインエラー:', error);
         res.status(500).json({ message: "サーバーエラー（ログイン処理失敗）" });
+    }
+});
+
+// ✅ 認証が必要なAPI（/api/profile）
+router.get('/profile', verifyToken, async (req, res) => {
+    try {
+        // 認証済みユーザーの情報を取得
+        const [users] = await pool.query('SELECT id, email FROM users WHERE id = ?', [req.user.userId]);
+
+        if (users.length === 0) {
+            return res.status(404).json({ message: "ユーザーが見つかりません" });
+        }
+
+        res.json(users[0]);
+    } catch (error) {
+        console.error('❌ プロフィール取得エラー:', error);
+        res.status(500).json({ message: "サーバーエラー（プロフィール取得失敗）" });
     }
 });
 
